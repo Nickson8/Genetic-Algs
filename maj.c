@@ -11,6 +11,7 @@
 int *check_n(int *a);
 int avaliacao(int **popu, int *a, int maj);
 void sexo(int ***popu, int **a, int maj);
+void teste(int *poggers);
 
 int main(void){
     //Número de regras da relevância table
@@ -55,28 +56,9 @@ int main(void){
         //printf("----------------------\n");
     }
 
-    /***RESULTADOS FINAIS***/
-    printf("-------------Maj: %d-------------\n", maj);
-    
-    //Vetor das posições da configuração inicial
-    int *p = NULL;
-    //Vetor cópia da configuração inicial
-    int *cp = calloc(tam+2*r, sizeof(int));
-    for(int j=r; j<tam+r; j++){
-        cp[j] = a[j];
-    }
-    //Indivíduo com melhor fitness
-    int poggers = avaliacao(popu, a, maj);
-    //Aplicando a rule table do poggers na CI M vezes e printando o resultado 
-    for(int j=0; j<m; j++){
-        p = check_n(cp);
-        for(int k=0; k<tam; k++){
-            cp[k+r] = popu[poggers][p[k]];
-            printf("%d", cp[k+r]);
-        }
-        printf("\n");
-    }
+    int *poggers = popu[avaliacao(popu, a, maj)];
 
+    teste(poggers);
 
 
     free(a);
@@ -84,8 +66,8 @@ int main(void){
         free(popu[i]);
     }
     free(popu);
-    free(p);
-    free(cp);
+    //free(p);
+    //free(cp);
     return 0;
 }
 
@@ -186,4 +168,48 @@ void sexo(int ***popu, int **a, int maj){
         }
     }
     //printf("---------------\n");
+}
+
+void teste(int *poggers){
+    //Número de regras da relevância table
+    int rules = pow(2, (2*r)+1);
+
+    //Var para contar 0s e 1s
+    int n1 = 0;
+    int n0 = 0;
+    //Vetor com as celulas
+    int *a = calloc((tam+2*r),sizeof(int));
+
+    //Colocando os valores no vetor, ja considerando o buffer
+    for(int i=r; i<tam+r; i++){
+        a[i] = rand() % 2;
+        //printf("%d ", a[i]);
+        if(a[i]==0){n0++;} else{n1++;}
+    }
+    
+    //Verificando qual é a maioria
+    int maj = 0;
+    if(n1>n0){
+        maj = 1;
+    } else{
+        maj = 0;
+    }
+
+    /***RESULTADOS FINAIS***/
+    printf("-------------Maj: %d-------------\n", maj);
+    
+    //Vetor das posições da configuração inicial
+    int *p = NULL;
+    //Aplicando a rule table do poggers na CI M vezes e printando o resultado 
+    for(int j=0; j<m; j++){
+        p = check_n(a);
+        for(int k=0; k<tam; k++){
+            a[k+r] = poggers[p[k]];
+            printf("%d", a[k+r]);
+        }
+        printf("\n");
+    }
+
+    free(a);
+    free(p);
 }
