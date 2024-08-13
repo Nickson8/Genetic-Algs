@@ -13,7 +13,10 @@ int avaliacao(int **popu, int *a, int maj);
 void sexo(int ***popu, int **a, int maj);
 
 int main(void){
+    //Número de regras da relevância table
     int rules = pow(2, (2*r)+1);
+
+    //Var para contar 0s e 1s
     int n1 = 0;
     int n0 = 0;
     //Vetor com as celulas
@@ -27,7 +30,8 @@ int main(void){
         //printf("%d ", a[i]);
         if(a[i]==0){n0++;} else{n1++;}
     }
-
+    
+    //Verificando qual é a maioria
     int maj = 0;
     if(n1>n0){
         maj = 1;
@@ -36,7 +40,7 @@ int main(void){
     }
     //printf("\n");
 
-    //Inicializando a população de regras inicial
+    //Inicializando a população de regras inicias aleatorias
     int **popu = malloc(pop*sizeof(int*));
     for(int i=0; i<pop; i++){
         popu[i] = malloc(rules*sizeof(int));
@@ -45,19 +49,25 @@ int main(void){
         }
     }
 
+    //Loop para as gerações
     for(int i=0; i<20; i++){
         sexo(&popu, &a, maj);
         //printf("----------------------\n");
     }
 
+    /***RESULTADOS FINAIS***/
     printf("-------------Maj: %d-------------\n", maj);
-
+    
+    //Vetor das posições da configuração inicial
     int *p = NULL;
+    //Vetor cópia da configuração inicial
     int *cp = calloc(tam+2*r, sizeof(int));
     for(int j=r; j<tam+r; j++){
         cp[j] = a[j];
     }
+    //Indivíduo com melhor fitness
     int poggers = avaliacao(popu, a, maj);
+    //Aplicando a rule table do poggers na CI M vezes e printando o resultado 
     for(int j=0; j<m; j++){
         p = check_n(cp);
         for(int k=0; k<tam; k++){
@@ -79,6 +89,7 @@ int main(void){
     return 0;
 }
 
+//Função para calcular a posição relativa de uma célula, retorna um Vetor com as posições de cada célula
 int *check_n(int *a){
     int *p = malloc(tam * sizeof(int));
     int cont = 0;
@@ -103,6 +114,7 @@ int *check_n(int *a){
     return p;
 }
 
+//Função para avaliar a população, retorna o indivíduo com mais fitness
 int avaliacao(int **popu, int *a, int maj){
     //Copiando a sequencia original
     int *cp = calloc(tam+2*r, sizeof(int));
@@ -126,6 +138,7 @@ int avaliacao(int **popu, int *a, int maj){
                 cp[k+r] = popu[i][p[k]];
             }
         }
+        //Método de avaliação
         for(int j=0; j<tam; j++){
             if(cp[j] == maj){
                 pnts++;
@@ -147,6 +160,7 @@ int avaliacao(int **popu, int *a, int maj){
     return poggers;
 }
 
+//Função para cruzar a população com o poggers
 void sexo(int ***popu, int **a, int maj){
     int rules = pow(2, (2*r)+1);
     int poggers = avaliacao(*popu, *a, maj);
@@ -159,6 +173,7 @@ void sexo(int ***popu, int **a, int maj){
         printf("\n");*/
 
         if(i != poggers){
+            //Cruzando com o poggers
             for(int j=0; j<(rules/4); j++){
                 int n = rand()%rules;
                 (*popu)[i][n] = (*popu)[poggers][n];
