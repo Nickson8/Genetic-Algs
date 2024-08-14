@@ -5,7 +5,7 @@
 
 #define tam 149
 #define r 3
-#define pop 5000
+#define pop 1000
 #define m 149
 
 int *check_n(int *a);
@@ -29,10 +29,13 @@ int main(void){
     }
 
     //Loop para as gerações
-    for(int i=0; i<10; i++){
+    for(int i=0; i<40; i++){
         sexo(&popu);
+        printf("%d ", i);
+        fflush(stdout);
         //printf("----------------------\n");
     }
+    printf("\n");
 
     int *poggers = popu[avaliacao(popu)];
 
@@ -94,40 +97,42 @@ int avaliacao(int **popu){
     int pnts, maj;
 
     for(int i=0; i<pop; i++){
+        //Testando o individuo para varias CI aleatorias
         pnts = 0;
-        maj = 1;
-        n1 = 0;
-        n0 =0;
-        //Colocando os valores no vetor, ja considerando o buffer
-        for(int j=r; j<tam+r; j++){
-            a[j] = rand() % 2;
-            //printf("%d ", a[j]);
-            if(a[j]==0){n0++;} else{n1++;}
-        }
-        
-        //Verificando qual é a maioria
-        if(n1>n0){
-            maj = 1;
-        } else{
+        for(int l=0; l<10; l++){
             maj = 0;
-        }
-        //Aplicando as regras do candidato M vezes
-        for(int j=0; j<m; j++){
-            if(p!=NULL){
-                free(p);
+            n1 = 0;
+            n0 =0;
+            //Colocando os valores no vetor, ja considerando o buffer
+            for(int j=r; j<tam+r; j++){
+                a[j] = rand() % 2;
+                //printf("%d ", a[j]);
+                if(a[j]==0){n0++;} else{n1++;}
             }
-            p = check_n(a);
-            for(int k=0; k<tam; k++){
-                a[k+r] = popu[i][p[k]];
+            
+            //Verificando qual é a maioria
+            if(n1>n0){
+                maj = 1;
+            } else{
+                maj = 0;
+            }
+            //Aplicando as regras do candidato M vezes
+            for(int j=0; j<m; j++){
+                if(p!=NULL){
+                    free(p);
+                }
+                p = check_n(a);
+                for(int k=0; k<tam; k++){
+                    a[k+r] = popu[i][p[k]];
+                }
+            }
+            //Método de avaliação
+            for(int j=0; j<tam; j++){
+                if(a[j] == maj){
+                    pnts++;
+                }
             }
         }
-        //Método de avaliação
-        for(int j=0; j<tam; j++){
-            if(a[j] == maj){
-                pnts++;
-            }
-        }
-        //printf("\n");
 
         if(pnts > pnt_p){
             pnt_p = pnts;
@@ -162,7 +167,7 @@ void sexo(int ***popu){
                 (*popu)[i][n] = (*popu)[poggers][n];
             }
             // Introduce random mutations
-            for(int j=0; j<(rules/32); j++){
+            for(int j=0; j<(rules/16); j++){
                 int n = rand() % rules;
                 (*popu)[i][n] = rand() % 2;
             }
