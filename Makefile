@@ -1,8 +1,8 @@
 maj:
-	gcc maj.c -lm -o alg ; ./alg
+	gcc maj.c -o alg -lm; ./alg
 
 val:
-	gcc maj.c -lm -g -o alg ; valgrind ./alg
+	gcc maj.c -g -o alg -lm; valgrind ./alg
 
 cel:
 	gcc cel_auto.c -o alg ; ./alg

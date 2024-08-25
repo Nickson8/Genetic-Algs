@@ -8,6 +8,10 @@
 #define pop 5000
 #define m 80
 
+#define gen 50
+#define spog 32
+#define mut 64
+
 int *check_n(int *a, int *p);
 int avaliacao(int **popu, int rules, int *a, int *p);
 void sexo(int ***popu, int rules, int *a, int *p);
@@ -16,14 +20,14 @@ int teste(int *poggers, int rules, int *a, int *p);
 int main(void) {
     int rules = pow(2, (2*r)+1);
 
-    srand(time(0));
+    srandom(time(NULL));
 
     // Allocate population
     int **popu = malloc(pop * sizeof(int*));
     for (int i = 0; i < pop; i++) {
         popu[i] = malloc(rules * sizeof(int));
         for (int k = 0; k < rules; k++) {
-            popu[i][k] = rand() % 2;
+            popu[i][k] = random() % 2;
         }
     }
 
@@ -31,7 +35,7 @@ int main(void) {
     int *p = malloc(tam * sizeof(int));      // Pre-allocated buffer
 
     // Loop for generations
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < gen; i++) {
         sexo(&popu, rules, a, p);
         printf("%d ", i);
         fflush(stdout);
@@ -41,7 +45,7 @@ int main(void) {
     int *poggers = popu[avaliacao(popu, rules, a, p)];
 
     double cont = 0;
-    int vezes = 100;
+    int vezes = 20;
     for (int i = 0; i < vezes; i++) {
         cont += teste(poggers, rules, a, p);
     }
@@ -84,13 +88,13 @@ int avaliacao(int **popu, int rules, int *a, int *p) {
 
     for (int i = 0; i < pop; i++) {
         pnts = 0;
-        for (int l = 0; l < 11; l++) {
+        for (int l = 0; l < 7; l++) {
             maj = 0;
             n1 = 0;
             n0 = 0;
 
             for (int j = r; j < tam + r; j++) {
-                a[j] = rand() % 2;
+                a[j] = random() % 2;
                 if (a[j] == 0) n0++; else n1++;
             }
 
@@ -112,6 +116,7 @@ int avaliacao(int **popu, int rules, int *a, int *p) {
 
         if (pnts > pnt_p) {
             pnt_p = pnts;
+            //printf("-----%d-----\n", pnt_p);
             poggers = i;
         }
     }
@@ -124,13 +129,13 @@ void sexo(int ***popu, int rules, int *a, int *p) {
 
     for (int i = 0; i < pop; i++) {
         if (i != poggers) {
-            for (int j = 0; j < (rules/2); j++) {
-                int n = rand() % rules;
-                (*popu)[i][n] = (*popu)[poggers][n];
+            for (int j = 0; j < (rules/spog); j++) {
+                int n1 = random() % rules;
+                (*popu)[i][n1] = (*popu)[poggers][n1];
             }
-            for (int j = 0; j < (rules/16); j++) {
-                int n = rand() % rules;
-                (*popu)[i][n] = rand() % 2;
+            for (int j = 0; j < (rules/mut); j++) {
+                int n2 = random() % rules;
+                (*popu)[i][n2] = ((*popu)[i][n2]==0) ? 1 : 0;
             }
         }
     }
@@ -141,10 +146,9 @@ int teste(int *poggers, int rules, int *a, int *p) {
     int n0 = 0;
 
     for (int i = r; i < tam + r; i++) {
-        a[i] = rand() % 2;
+        a[i] = random() % 2;
         if (a[i] == 0) n0++; else n1++;
     }
-
     int maj = (n1 > n0) ? 1 : 0;
 
     printf("-------------Maj: %d-------------\n", maj);
