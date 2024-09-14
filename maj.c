@@ -5,8 +5,8 @@
 
 #define tam 149
 #define r 3
-#define pop 5000
-#define m 80
+#define pop 500
+#define m 100
 
 #define gen 50
 #define spog 32
@@ -16,6 +16,7 @@ int *check_n(int *a, int *p);
 int avaliacao(int **popu, int rules, int *a, int *p);
 void sexo(int ***popu, int rules, int *a, int *p);
 int teste(int *poggers, int rules, int *a, int *p);
+int *quick2_sort(int *list, int *notas);
 
 int main(void) {
     int rules = pow(2, (2*r)+1);
@@ -83,6 +84,7 @@ int avaliacao(int **popu, int rules, int *a, int *p) {
     int n1, n0;
     int poggers = 0;
     int pnt_p = 0;
+    int *notas = malloc(pop*sizeof(int));
 
     int pnts, maj;
 
@@ -114,11 +116,7 @@ int avaliacao(int **popu, int rules, int *a, int *p) {
             }
         }
 
-        if (pnts > pnt_p) {
-            pnt_p = pnts;
-            //printf("-----%d-----\n", pnt_p);
-            poggers = i;
-        }
+        notas[i] = pnts;
     }
 
     return poggers;
@@ -169,4 +167,8 @@ int teste(int *poggers, int rules, int *a, int *p) {
     }
 
     return (cont > m-10) ? 1 : 0;
+}
+
+int *quick2_sort(int *list, int *notas){
+    
 }

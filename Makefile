@@ -6,3 +6,6 @@ val:
 
 cel:
 	gcc cel_auto.c -o alg ; ./alg
+
+maj_or:
+	gcc maj_or.c -o alg -lm; ./alg
