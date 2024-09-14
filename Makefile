@@ -9,3 +9,6 @@ cel:
 
 maj_or:
 	gcc maj_or.c -o alg -lm; ./alg
+
+point:
+	gcc point.c -o alg; ./alg
