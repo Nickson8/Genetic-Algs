@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <unistd.h>
 
 #define init_size 20
 #define popu_size 100
@@ -9,12 +10,17 @@
 typedef unsigned char uc;
 
 void print_array(uc m[init_size][init_size]);
-bool check_surrounding_ones(int arr[init_size][init_size], int row, int col);
+bool check_surrounding_ones(uc arr[init_size][init_size], int row, int col);
 uc** create_array();
 void free_array(uc ***m);
+void results(uc m[init_size][init_size], uc rule[9]);
 
 uc (*apply_rule(uc current[init_size][init_size], uc *rule_vector))[init_size];
 int check_neighbors(uc grid[init_size][init_size], int x, int y);
+
+int eval(uc m[init_size][init_size], uc popu[popu_size][9]);
+int test(uc m[init_size][init_size], uc rule[9]);
+
 
 
 
@@ -28,8 +34,8 @@ int main(void){
             m[i][j] = 0;
         }
     }
-    m[init_size-1][init_size/2] = 1;
-    print_array(m);
+    m[init_size-5][init_size/2] = 1;
+    //print_array(m);
 
 
     //Initializing the popu
@@ -39,6 +45,10 @@ int main(void){
             popu[i][j] = rand() % 2;
         }
     }
+
+    results(m, popu[eval(m, popu)]);
+
+    printf("\n%d\n", eval(m, popu));
     
 }
 
@@ -46,11 +56,14 @@ int main(void){
 
 
 int eval(uc m[init_size][init_size], uc popu[popu_size][9]){
-    int poggers = 0;
-    int pnts_max = 0;
+    int poggers = -1;
+    int pnts_max = -1;
+    int pnts = 0;
 
     for(int i=0; i<popu_size; i++){
-        if(test(m, popu[i]) > pnts_max){
+        pnts = test(m, popu[i]);
+        if(pnts > pnts_max){
+            pnts_max = pnts;
             poggers = i;
         }
     }
@@ -61,24 +74,21 @@ int eval(uc m[init_size][init_size], uc popu[popu_size][9]){
 int test(uc m[init_size][init_size], uc rule[9]){
     int pnts = 0;
 
-    uc **next = create_array();
-    next = apply_rule(m, rule);
+    uc (*next)[init_size] = apply_rule(m, rule);
 
-    for(int k=0; k<10; k++){
+    for(int k=0; k<20; k++){
         for(int i=0; i<init_size; i++){
             for(int j=0; j<init_size; j++){
                 if(next[i][j] == 1){
                     pnts+=2;
                     if(check_surrounding_ones(next, i, j)){
-                        pnts--;
+                        pnts-=3;
                     }
                 }
             }
         }
         next = apply_rule(next, rule);
     }
-
-    free_array(&next);
 
     return pnts;
 
@@ -141,8 +151,32 @@ int check_neighbors(uc grid[init_size][init_size], int x, int y) {
 /*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
 
+void results(uc m[init_size][init_size], uc rule[9]){
+    uc (*next)[init_size] = apply_rule(m, rule);
+
+    sleep(1);
+    system("clear");
+
+    for(int k=0; k<20; k++){
+        printf("%d\n", k+1);
+        for(int i=0; i<init_size; i++){
+            for(int j=0; j<init_size; j++){
+                printf("%d ", next[i][j]);
+            }
+            printf("\n");
+        }
+        // Wait for 1 second
+        k==0 ? sleep(3) : sleep(1);
+        
+        // Clear the terminal screen
+        k==20-1 ?  : system("clear");
+
+        next = apply_rule(next, rule);
+    }
+}
+
 // Function to check if there's a 1 in the surrounding neighborhood of the element at (row, col)
-bool check_surrounding_ones(int arr[init_size][init_size], int row, int col) {
+bool check_surrounding_ones(uc arr[init_size][init_size], int row, int col) {
     // Iterate over the 3x3 grid centered around arr[row][col]
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -192,4 +226,5 @@ void print_array(uc m[init_size][init_size]){
         }
         printf("\n");
     }
+    printf("---------------------------------\n");
 }
