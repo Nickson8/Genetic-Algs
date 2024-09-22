@@ -4,8 +4,10 @@
 #include <time.h>
 #include <unistd.h>
 
-#define init_size 20
+#define init_size 30
 #define popu_size 100
+#define mut 0.1
+#define gen 100
 
 typedef unsigned char uc;
 
@@ -13,15 +15,15 @@ void print_array(uc m[init_size][init_size]);
 bool check_surrounding_ones(uc arr[init_size][init_size], int row, int col);
 uc** create_array();
 void free_array(uc ***m);
-void results(uc m[init_size][init_size], uc rule[9]);
+void results(uc m[init_size][init_size], uc rule[256]);
 
 uc (*apply_rule(uc current[init_size][init_size], uc *rule_vector))[init_size];
 int check_neighbors(uc grid[init_size][init_size], int x, int y);
 
-int eval(uc m[init_size][init_size], uc popu[popu_size][9]);
-int test(uc m[init_size][init_size], uc rule[9]);
+int eval(uc m[init_size][init_size], uc popu[popu_size][256]);
+int test(uc m[init_size][init_size], uc rule[256]);
 
-
+uc (*sexo(uc popu[popu_size][256], int poggers))[256];
 
 
 
@@ -34,28 +36,43 @@ int main(void){
             m[i][j] = 0;
         }
     }
-    m[init_size-5][init_size/2] = 1;
+    //Initializing a square
+    for(int i=0; i<init_size/4; i++){
+        m[init_size/4+i][1] = 1;
+        m[init_size/4+i][init_size/4] = 1;
+
+        m[init_size/4][1+i] = 1;
+        m[init_size/4+6][1+i] = 1;
+    }
     //print_array(m);
 
 
     //Initializing the popu
-    uc popu[popu_size][9];
+    uc popu[popu_size][256];
     for(int i=0; i<popu_size; i++){
-        for(int j=0; j<9; j++){
+        for(int j=0; j<256; j++){
             popu[i][j] = rand() % 2;
         }
     }
 
-    results(m, popu[eval(m, popu)]);
+    //Generations
+    int poggers = eval(m, popu);
+    uc (*next_popu)[256] = sexo(popu, poggers);
+    for(int i=0; i<gen; i++){
+        poggers = eval(m, next_popu);
+        next_popu = sexo(next_popu, poggers);
+    }
 
-    printf("\n%d\n", eval(m, popu));
+    results(m, next_popu[eval(m, next_popu)]);
+
+    printf("\n%d\n", eval(m, next_popu));
     
 }
 
 /*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
 
-int eval(uc m[init_size][init_size], uc popu[popu_size][9]){
+int eval(uc m[init_size][init_size], uc popu[popu_size][256]){
     int poggers = -1;
     int pnts_max = -1;
     int pnts = 0;
@@ -67,11 +84,13 @@ int eval(uc m[init_size][init_size], uc popu[popu_size][9]){
             poggers = i;
         }
     }
+    printf("%d ", pnts_max);
+    fflush(stdout);
 
     return poggers;
 }
 
-int test(uc m[init_size][init_size], uc rule[9]){
+int test(uc m[init_size][init_size], uc rule[256]){
     int pnts = 0;
 
     uc (*next)[init_size] = apply_rule(m, rule);
@@ -80,9 +99,19 @@ int test(uc m[init_size][init_size], uc rule[9]){
         for(int i=0; i<init_size; i++){
             for(int j=0; j<init_size; j++){
                 if(next[i][j] == 1){
-                    pnts+=2;
-                    if(check_surrounding_ones(next, i, j)){
-                        pnts-=3;
+                    if(next[i][j+1] == 0){
+                        pnts++;
+                    }
+                    if(next[i][j-1] == 0){
+                        pnts--;
+                    }
+                }
+                if(next[i][j] == 0){
+                    if(next[i][j+1] == 1){
+                        pnts++;
+                    }
+                    if(next[i][j-1] == 1){
+                        pnts--;
                     }
                 }
             }
@@ -98,8 +127,33 @@ int test(uc m[init_size][init_size], uc rule[9]){
 /*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
 
-// Function to apply the rule based on the locations of the neighbors' 1s
-uc (*apply_rule(uc current[init_size][init_size], uc *rule_vector))[init_size] {
+uc (*sexo(uc popu[popu_size][256], int poggers))[256]{
+    static uc next[popu_size][256];
+
+    //Copying popu to next
+    for (int i=0; i < popu_size; i++){
+        for(int j=0; j<256; j++){
+            next[i][j] = popu[i][j];
+        }
+    }
+    
+
+    for(int i=0; i<popu_size; i++){
+        if(i == poggers) continue;
+        int mutations = 256*mut;
+        for(int j=0; j<mutations; j++){
+            next[i][random() % 256] = random() % 2;
+        }
+    }
+
+    return next;
+}
+
+
+/*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+
+
+uc (*apply_rule(uc current[init_size][init_size], uc *rule_vector))[init_size]{
     static uc next[init_size][init_size];  // Static array to hold the result
 
     // Reset the next array to zero for each call
@@ -151,7 +205,7 @@ int check_neighbors(uc grid[init_size][init_size], int x, int y) {
 /*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
 
-void results(uc m[init_size][init_size], uc rule[9]){
+void results(uc m[init_size][init_size], uc rule[256]){
     uc (*next)[init_size] = apply_rule(m, rule);
 
     sleep(1);
